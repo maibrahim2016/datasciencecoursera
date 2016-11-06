@@ -1,0 +1,181 @@
+---
+title: "Part 2: Basic Inferential Data Analysis"
+author: "Muhammed Afifi Ibrahim"
+date: "November 5, 2016"
+output: html_document
+---
+
+
+##### <br><br><b>Analyze the ToothGrowth data in the R datasets package</b>
+
+1. Load the ToothGrowth data and perform some basic exploratory data analyses
+2. Provide a basic summary of the data.
+3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose (only use the techniques from class, even if there's other approaches worth considering).
+4. State your conclusions and the assumptions needed for your conclusions.
+<br/><br/>
+
+
+```{r}
+    library(dplyr)
+    library(ggplot2)
+
+```
+
+#### <br><b>Question 1: Load the ToothGrowth data and perform some basic exploratory data analyses.</b></br>
+
+##### Load dataset ToothGrowth
+```{r}
+    library(datasets)
+    data(ToothGrowth)
+```
+
+##### Some basic exploratory data analyses 
+```{r}
+            str(ToothGrowth)
+            head(ToothGrowth)
+            tail(ToothGrowth)
+```
+
+##### Number of Rows and Columns.
+```{r}
+
+            dim(ToothGrowth)
+ 
+```
+
+##### Sample Size n
+```{r}
+
+           length(ToothGrowth$len)
+
+```
+
+##### Mean group by dose and by OJ & VC
+```{r}
+
+          aggregate(ToothGrowth$len,list(ToothGrowth$supp,ToothGrowth$dose),mean)
+
+```
+
+##### Standard Deviation group by dose and by OJ & VC
+```{r}
+
+            aggregate(ToothGrowth$len,list(ToothGrowth$supp,ToothGrowth$dose),sd)
+
+```
+
+##### Boxplot graph of the tooth length vs the does
+```{r, echo=TRUE}
+            ggplot(ToothGrowth, aes(x = factor(dose), y = len, fill = factor(dose)))+
+                  geom_boxplot()+
+                  facet_grid(.~supp)+
+                  labs(title = "Tooth Length vs. Dose  by for OJ & VC",
+                  x = "Doses", y = "Tooth Length")
+
+```
+
+#### <br><b> Question 2: Provide a basic summary of the data.</b></br>
+
+```{r}
+
+            summary(ToothGrowth)
+
+```
+
+##### Table view of data. 
+```{r}
+
+            table(ToothGrowth$supp,ToothGrowth$dose)
+
+```
+
+#### <br><b>Question 3: Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose.</b></br>
+
+From the box plot, OJ looks to be doing better with dose 0.5 and 1 effect on teeth growth than VC. To test this hypothesis by hold a the mean of OJ and VC does not cross zero.</br>
+
+##### <b>Dose 0.5</b></br>
+We are 95% confident that the limits of 1.719057 and 8.780943 actually do contain the difference between the two population means.Because those limts do not contain zero, this confodence interval suggests that it is very possible that the two population means are not equal.
+
+```{r}
+
+            ojdose0.5 <- ToothGrowth %>% filter(supp=="OJ" & dose=="0.5")
+            vcdose0.5 <- ToothGrowth %>% filter(supp=="VC" & dose=="0.5")
+            t.test(ojdose0.5$len,vcdose0.5$len)
+
+```
+
+##### <b>Dose 1</b></br>
+We are 95% confident that the limits of 2.802148 and 9.057852 actually do contain the difference between the two population means. Because those limts do not contain zero, this confodence interval suggests that it is very possible that the two population means are not equal.
+
+```{r}
+
+            ojdose1 <- ToothGrowth %>% filter(supp=="OJ" & dose=="1")
+            vcdose1 <- ToothGrowth %>% filter(supp=="VC" & dose=="1")
+            t.test(ojdose1$len,vcdose1$len)
+
+```
+
+##### <b>Dose 2</b></br>
+
+We are 95% confident that the limits of -3.79807 and 3.63807 actually do contain the difference between the two population means. However, because those limts do contain zero, this confodence interval suggests that it is very possible that the two population means are equal.
+
+```{r}
+
+            ojdose2 <- ToothGrowth %>% filter(supp=="OJ" & dose=="2")
+            vcdose2 <- ToothGrowth %>% filter(supp=="VC" & dose=="2")
+            t.test(ojdose2$len,vcdose2$len)
+
+```
+
+#### <br><b>Question 4: State your conclusions and the assumptions needed for your conclusions.</b></br>
+
+We are 95% confident that dose 0.5 and dose 1 of OJ result in longer tooth length than dose 0.5 and dose 1 of VC. However, at the highest dose of 2, there is no statistically significant difference between the effects of OJ and VC. 
+
+
+#### <br><b> Appendix</b></br>
+```{r}
+    head(ToothGrowth)
+
+```
+```{r}
+    dim(ToothGrowth)
+```
+```{r}
+    table(ToothGrowth$supp,ToothGrowth$dose)
+```
+
+<b>Figure 1 Code</b>
+```{r}
+    ggplot(ToothGrowth, aes(x = factor(dose), y = len, fill = factor(dose)))+ 
+    geom_boxplot()+ 
+    facet_grid(.~supp)+ 
+    labs(title = "Tooth Length vs. Dose by for OJ & VC", 
+    x = "Doses", y = "Tooth Length")
+
+```
+
+##### <br><b>Dose 0.5</b></br></br>
+```{r}
+    ojdose0.5 <- ToothGrowth %>% filter(supp=="OJ" & dose=="0.5") 
+    vcdose0.5 <- ToothGrowth %>% filter(supp=="VC" & dose=="0.5")   
+    t.test(ojdose0.5$len,vcdose0.5$len)
+
+```
+
+##### <b>Dose 1</b></br></br>
+
+```{r}
+    ojdose1 <- ToothGrowth %>% filter(supp=="OJ" & dose=="1") 
+    vcdose1 <- ToothGrowth %>% filter(supp=="VC" & dose=="1") 
+    t.test(ojdose1$len,vcdose1$len)
+
+```
+
+##### <b>Dose 2</b></br></br>
+
+```{r}
+    ojdose2 <- ToothGrowth %>% filter(supp=="OJ" & dose=="2") 
+    vcdose2 <- ToothGrowth %>% filter(supp=="VC" & dose=="2") 
+    t.test(ojdose2$len,vcdose2$len)
+```
+
