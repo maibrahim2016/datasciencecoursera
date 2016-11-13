@@ -1,11 +1,11 @@
 ---
-title: "Regression Models Project - Motor Trend Data Analysis Report"
+title: "Regression Models - Motor Trend Data Analysis Report"
 author: "by Muhammed Afifi Ibrahim"
 output:
   html_document: default
   pdf_document:
-    fig_height: 7
-    fig_width: 7
+    fig_height: 5
+    fig_width: 6
 ---
   
 ### <br><b> Executive Summary</b>
