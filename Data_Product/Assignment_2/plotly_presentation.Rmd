@@ -70,11 +70,12 @@ ggplotly(gap.bubble.plot, tooltip=c("text"))
 ## References
 
 Plot and code inspired by</br>
-http://www.stat.ubc.ca/~jenny/STAT545A/block17_colorsGgplot2Qualitative.html</br>
-http://www.stat.ubc.ca/~jenny/notOcto/STAT545A/examples/gapminder/data/gapminderCountryColors.txt</br>
-https://www.gapminder.org/
+[Stat UBC](http://www.stat.ubc.ca/~jenny/STAT545A/block17_colorsGgplot2Qualitative.html)</br>
+[Source Data](http://www.stat.ubc.ca/~jenny/notOcto/STAT545A/examples/gapminder/data/gapminderCountryColors.txt)</br>
+[Gapminder](https://www.gapminder.org/)
 
 License</br>
-https://creativecommons.org/licenses/by-nc/3.0/
+[Creative Commons](https://creativecommons.org/licenses/by-nc/3.0/)
 
 GitHub</br>
+[My GitHub](https://github.com/maibrahim2016/datasciencecoursera/tree/master/Data_Product/Assignment_2)
