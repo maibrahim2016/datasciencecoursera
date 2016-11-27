@@ -1,0 +1,80 @@
+---
+title: "<b>Developing Data Products: Week 3 Assignment</b>"
+subtitle: "Use the spacebar or arrow keys to navigate slides"
+author: "Muhammed Afifi Ibrahim"
+date: "27/11/2016"
+output: 
+    ioslides_presentation:
+    widescreen: true
+    smaller: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+##<b>Instructions</b></br>
+Create a web page presentation using R Markdown that features a plot created with Plotly. Host your webpage on either GitHub Pages, RPubs, or NeoCities. 
+
+Your webpage must contain the date that you created the document, and it must contain a plot created with Plotly. We would love to see you show off your creativity!
+
+<b>Notice</b></br>
+To run the presentation in R install:</br>
+
+  [1] Plotly with the command: install.packages("plotly")</br>
+  [2] Load the library with: library(plotly)</br>
+  [3] Load the library with: library(gapminder)
+  
+##<b>Project Summary</b></br>
+This assignment is to display some information using plotly presentation.
+  
+```{r echo=FALSE, warning=FALSE, message=FALSE }
+library(ggplot2)
+library(plotly)
+library(gapminder)
+```
+
+## Gapminder Bubble Plot (2007)
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+gDat <- gapminder
+jDat <- droplevels(subset(gDat, continent != "Oceania"))
+
+#colorsURL <- "http://www.stat.ubc.ca/~jenny/notOcto/STAT545A/examples/gapminder/data/gapminderCountryColors.txt"
+# countryColors <- read.delim(file = colorsURL, as.is = 3) # protect color
+
+countryColors <- read.delim(file="CountryColors", header=TRUE, as.is = 3)
+
+jColors <- countryColors$color
+names(jColors) <- countryColors$country
+
+jYear <- 2007
+
+jDat <- jDat[with(jDat, order(year, -1 * pop)), ]
+gap.bubble.plot <- ggplot(subset(jDat, year == jYear),
+       aes(x = gdpPercap, y = lifeExp )) + scale_x_log10() +
+  geom_point(aes(size = sqrt(pop/pi), text = paste(country, lifeExp, "years")), pch = 21) + 
+  scale_size_continuous(range=c(1,40)) +
+  facet_wrap(~ continent) + 
+  aes(fill = country) + scale_fill_manual(values = jColors) + theme(legend.position="none") +
+  xlab("GDP Per Capita\n") + ylab("\nLife Expectancy")
+
+
+ggplotly(gap.bubble.plot, tooltip=c("text"))
+
+```
+
+</br>See following slide for references
+
+## References
+
+Plot and code inspired by</br>
+http://www.stat.ubc.ca/~jenny/STAT545A/block17_colorsGgplot2Qualitative.html</br>
+http://www.stat.ubc.ca/~jenny/notOcto/STAT545A/examples/gapminder/data/gapminderCountryColors.txt</br>
+https://www.gapminder.org/
+
+License</br>
+https://creativecommons.org/licenses/by-nc/3.0/
+
+GitHub</br>

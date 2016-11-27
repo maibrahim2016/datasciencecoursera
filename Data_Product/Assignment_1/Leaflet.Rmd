@@ -1,0 +1,24 @@
+---
+title: "##<b>Peer Graded Assignment: R Markdown and Leaflet</b>"
+author: "Muhammed Afifi Ibrahim"
+date: "November 19, 2016"
+output:
+  html_document: default
+---
+
+### <br><b> Executive Summary</b></br>
+The assignment is to display information on a leaflet graph. For my assignment, I am plotting the location of my current company in the state of Selangor, Malaysia. This map was generated today November 19, 2016. 
+
+Click on the icon to display the Company name and location.
+
+
+```{r, echo = TRUE}
+
+library(leaflet)
+
+m <- leaflet() %>%
+     addTiles() %>%  # Add default OpenStreetMap map tiles
+     addMarkers(lng=101.6580, lat=2.9211, popup="Wealth-X Services, Selangor, Malaysia")
+
+m  # Print the map
+```
