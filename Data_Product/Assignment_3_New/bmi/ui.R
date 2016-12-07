@@ -1,9 +1,11 @@
-library(rCharts)
 library(shiny)
 library(datasets)
 library(ISOcodes)
 library(UsingR)
+library(ggplot2)
 library(rsconnect)
+require(devtools)
+require(rCharts)
 
 data(ISO_3166_1)
 shinyUI(pageWithSidebar(
