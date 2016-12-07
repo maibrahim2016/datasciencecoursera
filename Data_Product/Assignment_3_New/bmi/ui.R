@@ -1,9 +1,11 @@
-library(rCharts)
 library(shiny)
 library(datasets)
 library(ISOcodes)
 library(UsingR)
+library(ggplot2)
 library(rsconnect)
+require(devtools)
+require(rCharts)
 
 data(ISO_3166_1)
 shinyUI(pageWithSidebar(
@@ -21,8 +23,8 @@ shinyUI(pageWithSidebar(
                         multiple = FALSE,selected=NULL)),
                 actionButton("goButton", "GO!"),
                 br(),
-                p(strong(em("Documentation:",a("Body Mass Index Classification for Adults",href="Readme.html")))),
-                p(strong(em("Github repository:",a("Developing Data Products - Shiny Application and Reproducible Pitch",href="https://github.com/maibrahim2016/datasciencecoursera/tree/master/Data_Product/Assignment_3"))))
+                p(strong(em("Documentation:",a("Body Mass Index Classification for Adults",href="https://github.com/maibrahim2016/datasciencecoursera/tree/master/Data_Product/Assignment_3_New/README.md")))),
+                p(strong(em("Github repository:",a("Developing Data Products - Shiny Application and Reproducible Pitch",href="https://github.com/maibrahim2016/datasciencecoursera/tree/master/Data_Product/Assignment_3_New"))))
         ),
         mainPanel(
                 tabsetPanel(

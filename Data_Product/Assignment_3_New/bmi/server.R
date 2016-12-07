@@ -79,8 +79,9 @@ library(shiny)
 library(reshape2)
 library(xlsx)
 library(ISOcodes)
+library(ggplot2)
 library(rCharts)
-library(rsconnect)
+
 
 data(ISO_3166_1)
 
