@@ -1,0 +1,295 @@
+---
+title: "Capstone - Milestone Report"
+author: "By Muhammed Afifi Ibrahim (muhd.afifi86@gmail.com)"
+date: "Feb 12, 2017"
+output: html_document
+---
+
+#### <br><b>INTRODUCTION</b></br>
+
+##### <br><u>Project Goal</u></br>
+
+The goal of this project is just to display that you've gotten used to working with the data and that you are on track to create your prediction algorithm. 
+
+
+##### <br><u>Project Requirement</u></br>
+
+Please submit a report on R Pubs (http://rpubs.com/) that explains your exploratory analysis and your goals for the eventual app and algorithm. This document should be concise and explain only the major features of the data you have identified and briefly summarize your plans for creating the prediction algorithm and Shiny app in a way that would be understandable to a non-data scientist manager. You should make use of tables and plots to illustrate important summaries of the data set. 
+
+The motivation for this project is to:
+
+1. Demonstrate that you've downloaded the data and have successfully loaded it in.
+2. Create a basic report of summary statistics about the data sets.
+3. Report any interesting findings that you amassed so far.
+4. Get feedback on your plans for creating a prediction algorithm and Shiny app.
+
+The data provided for NLP (Natural Language Processing) consists of 3 "corpora" of data:
+
+* Blog posts
+* News articles
+* "Tweets" on Twitter
+
+#### <br><b>READING DATA AND BASIC ANALYSIS</b></br>
+
+##### <br><u>Load Libraries</u></br>
+
+```{r}
+## Load libraries and suppress messages for ease of reading report
+
+suppressMessages(library(dplyr))
+suppressMessages(library(ggplot2))
+suppressMessages(library(LaF))
+suppressMessages(library(quanteda))
+suppressMessages(library(RColorBrewer)) 
+suppressMessages(library(RWeka))
+suppressMessages(library(SnowballC))
+suppressMessages(library(tau))
+suppressMessages(library(tm))
+suppressMessages(library(wordcloud))
+```
+
+##### <br><u>Downloading or Extracting Data</u></br>
+
+```{r}
+# Download and extract data
+source_file <- "http://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip"
+destination_file <- "Coursera-SwiftKey.zip"
+download.file(source_file, destination_file)
+unzip(destination_file)
+
+# Unzip file
+unzip(destination_file, list = FALSE )
+```
+
+##### <br><u>Reading Data</u></br>
+
+```{r}
+# Load the data en_US data
+dataBlogs <- readLines("./final/en_US/en_US.blogs.txt", encoding = "UTF-8", skipNul = TRUE)
+dataNews <- readLines("./final/en_US/en_US.news.txt", encoding = "UTF-8", skipNul = TRUE, warn = FALSE)
+dataTwitter <- readLines("./final/en_US/en_US.twitter.txt", encoding = "UTF-8", skipNul = TRUE)
+
+#Convert to ASCII
+dataNews <- iconv(dataNews, 'UTF-8', 'ASCII', "byte")
+dataBlogs <- iconv(dataBlogs, 'UTF-8', 'ASCII', "byte")
+dataTwitter <- iconv(dataTwitter, 'UTF-8', 'ASCII', "byte")
+```
+Since these files are huge (based on time taken to read), a quick summary will help determine a sampling approach.
+
+##### <br><b>Exploratory Analysis 1:</b></br>
+
+```{r}
+# Assess size of all 3 files - blogs, news and Twitter
+dataBlogs.filesizeMB <- file.size("./final/en_US/en_US.blogs.txt")
+dataNews.filesizeMB <- file.size("./final/en_US/en_US.news.txt")
+dataTwitter.filesizeMB <- file.size("./final/en_US/en_US.twitter.txt")
+```
+
+```{r, echo = FALSE}
+# Determine word count and length of the longest line seen
+dataBlogs.wordsCount <- nchar(dataBlogs)
+tmax <- which.max(dataBlogs.wordsCount)
+dataBlogs.longestWordCount <- nchar(dataBlogs[tmax])
+
+dataNews.wordsCount <- nchar(dataNews)
+tmax <- which.max(dataNews.wordsCount)
+dataNews.longestWordCount <- nchar(dataNews[tmax])
+
+dataTwitter.wordsCount <- nchar(dataTwitter)
+tmax <- which.max(dataTwitter.wordsCount)
+dataTwitter.longestWordCount <- nchar(dataTwitter[tmax])
+```
+
+```{r, echo = FALSE}
+# Combine into a data frame
+dataframe.blogs <- c(dataBlogs.filesizeMB, length(dataBlogs.wordsCount), dataBlogs.longestWordCount)
+dataframe.news <- c(dataNews.filesizeMB, length(dataNews.wordsCount), dataNews.longestWordCount)
+dataframe.twitter <- c(dataTwitter.filesizeMB, length(dataTwitter.wordsCount), dataTwitter.longestWordCount)
+```
+
+##### <br><u>Create Table for File Size, Word Count & Longest Line</u></br>
+
+```{r}
+info <- data.frame(rbind(dataframe.blogs, dataframe.news, dataframe.twitter))
+names(info) <- c("File Size (MB)", "Word Count", "Longest Line")
+row.names(info) <- c("Blogs", "News", "Twitter")
+
+# Showcase table
+info
+```
+
+##### <br><u>Sampling & Prediction Approach: Word Frequency</u></br>
+
+Since working with such huge data sets is memory intensive, using basic random sampling, I will try to reduce the text to mine through. This sample would also be used for the final predictive analysis.
+
+The sampling has been arbitrarily chosen as 5 % of the actual file parameters. However, based on the prediction results, this could later be increased or decreased. The exploratory analysis is however based on the initial arbitrary value.
+
+```{r}
+# Assess maximum number of characters in a line of the files
+summary(nchar(dataBlogs))[6] 
+summary(nchar(dataNews))[6] 
+summary(nchar(dataTwitter))[6] 
+
+# Run sampling at 5% of the actual file parameters because of sizes of files
+dataBlogs_sample_size   <- round(.05 * length(dataBlogs), 0)
+dataNews_sample_size    <- round(.05 * length(dataNews), 0) 
+dataTwitter_sample_size <- round(.05 * length(dataTwitter), 0)
+
+# Compute with approximately 5% of the population for each file
+dataBlogs_sample <- sample_lines("./final/en_US/en_US.blogs.txt", n = dataBlogs_sample_size, nlines = NULL) 
+dataNews_sample <- sample_lines("./final/en_US/en_US.news.txt", n = dataNews_sample_size , nlines = NULL) 
+dataTwitter_sample <- sample_lines("./final/en_US/en_US.twitter.txt", n = dataTwitter_sample_size, nlines = NULL)
+```
+
+##### <br><b>Exploratory Analysis 2:</b></br>
+
+```{r}
+# Determine word frequency for each of the 3 files
+dataBlogs_word_freq <- dfm(dataBlogs_sample, verbose = FALSE)
+dataNews_word_freq <- dfm(dataNews_sample, verbose = FALSE)
+dataTwitter_word_freq <- dfm(dataTwitter_sample, verbose = FALSE)
+
+docfreq(dataBlogs_word_freq)[1:11]
+docfreq(dataNews_word_freq)[1:11]
+docfreq(dataTwitter_word_freq)[1:11]
+```
+The function below will be used to clean the data, including stemming. Stop words are not removed on purpose. Stop words provided much needed context and sentence fluidity in natural language and hence they will be retained.
+
+####<br><b>CLEANING DATA</b></br>
+
+```{r, echo = FALSE}
+require(tm)
+require(SnowballC)
+require(RWeka)
+require(slam)
+require(ggplot2)
+```
+
+```{r, echo = FALSE}
+# Set CleanR function
+CleanR <- function(corpus){
+        tm_map(corpus, removeNumbers) %>%
+                tm_map(removePunctuation) %>%
+                tm_map(content_transformer(tolower)) %>%
+                tm_map(stripWhitespace) %>%
+                tm_map(stemDocument)
+                tm_map(PlainTextDocument)
+}
+```
+
+```{r, echo = FALSE}
+# Combine all twitter, blogs and news and save to RData
+all <- c(dataBlogs, dataNews, dataTwitter)
+save(all, file="all.RData")
+
+all.sample <- sample(all, round(0.02*length(all)))
+save(all.sample, file="sample-2p.RData")
+```
+
+```{r, echo = FALSE}
+# Create the corpus
+corpus <- Corpus(VectorSource(all.sample))
+corpus <- tm_map(corpus, content_transformer(removePunctuation), lazy = TRUE)
+corpus <- tm_map(corpus, content_transformer(removeNumbers), lazy = TRUE)
+corpus <- tm_map(corpus, content_transformer(tolower), lazy = TRUE)
+corpus <- tm_map(corpus, content_transformer(stripWhitespace), lazy = TRUE)
+corpus <- tm_map(corpus, content_transformer(PlainTextDocument), lazy = TRUE)
+```
+
+```{r}
+# Set CleanR function
+CleanR <- function(corpus){
+        tm_map(corpus, removeNumbers) %>%
+                tm_map(removePunctuation) %>%
+                tm_map(content_transformer(tolower)) %>%
+                tm_map(stripWhitespace) %>%
+                tm_map(stemDocument)
+}
+```
+
+```{r, echo = FALSE}
+# Save the corpus for next phase of capstone
+save(corpus, file="WorkingCorpus.RData")
+```
+#### <br><b>SAMPLE ANALYSIS RESULT </b></br>
+##### <br><b><u>nGram</u></b></br>
+
+```{r}
+# Create a few NGram functions via RWeka
+unigram_token <- function(x)  NGramTokenizer(x, Weka_control(min = 1, max = 1))
+bigram_token <- function(x)   NGramTokenizer(x, Weka_control(min = 2, max = 2))
+trigram_token <- function(x)  NGramTokenizer(x, Weka_control(min = 3, max = 3))
+```
+
+##### <br><b><u>UniGram (Histogram)</u></b></br>
+
+```{r}
+# Create UniGram functions via RWeka
+options(stringsAsFactors = FALSE)
+options(mc.cores = 1)
+unigram <- TermDocumentMatrix(corpus, control=list(tokenize=unigram_token))
+unigram.good <- rollup(unigram, 2, na.rm=TRUE, FUN = sum)
+```
+
+```{r}
+# Sort with decreasing frequency
+unigram.tf <- findFreqTerms(unigram.good, lowfreq = 3)
+unigram.tf <- sort(rowSums(as.matrix(unigram.good[unigram.tf, ])), decreasing = TRUE)
+unigram.tf <- data.frame(unigram.good=names(unigram.tf), frequency=unigram.tf)
+names(unigram.tf) <- c("word", "frequency")
+head(unigram.tf, 10)
+```
+
+```{r, echo = FALSE}
+# Plot top 10 word frequency for UniGram
+g <- ggplot(data = head(unigram.tf, 10), aes(x = word, y = frequency))
+g <- g + geom_bar(stat="Identity", fill="green", colour = "black")
+g <- g + geom_text(aes(label=frequency), vjust=-0.1)
+g <- g + theme(axis.text.x = element_text(angle = 45, hjust = 2))
+g
+```
+
+##### <br><b><u>BiGram</u></b></br>
+```{r}
+# BiGram work
+bi.gram.dataBlogs <- textcnt(dataBlogs_sample, n = 2, method = "string") 
+bi.gram.dataBlogs <- bi.gram.dataBlogs[order(bi.gram.dataBlogs, decreasing = TRUE)]
+bi.gram.dataBlogs[1:3] # top three, 2-Word combinations
+```
+
+##### <br><b><u>Word Clouds</u></b></br>
+
+```{r}
+blogs_corpus <- VCorpus(DataframeSource(data.frame(dataBlogs_sample)))
+news_corpus <- VCorpus(DataframeSource(data.frame(dataNews_sample)))
+twitter_corpus <- VCorpus(DataframeSource(data.frame(dataTwitter_sample)))
+
+rm(dataBlogs_sample); rm(dataNews_sample); rm(dataTwitter_sample)
+
+blogs_corpus <- CleanR(blogs_corpus)
+news_corpus <- CleanR(news_corpus)
+twitter_corpus <- CleanR(twitter_corpus)
+
+pal <- brewer.pal(8,"Accent")
+
+wordcloud(blogs_corpus, max.words = 90, random.order = FALSE, colors = pal)
+wordcloud(news_corpus, max.words = 90, random.order = FALSE, colors = pal)
+wordcloud(twitter_corpus, max.words = 90, random.order = FALSE, colors = pal)
+```
+
+#### <br><b>PREDICTION & SHINY</b></br>
+The below section briefly explains the approach for prediction and creating a shiny app. At the time of writing this report, profanity filter has not be decided.<br>
+
+The next steps in the project are:<br>
+
+  1. Continuing cleaning the corpus to to increase the accuracy of the model
+  2. Refining the sampling process for getting a good ngram representation without using the        entire corpus
+  3. Building the final prediction model and testing it
+
+##### <br><u>Prediction Approach:</u></br>
+The samples corpus would be used to create bi and tri gram frequencies. The data frames would then be used to predict the next word from the n-gram frequency table.
+
+The top two words per the frequency table would be returned. Only the last word will be used to predict even though the input may be more than one word.
+
+##### <br><u>Shiny Apps:</u></br>
+The app would take user input as characters strings and use the last input word and return top two words that could be next.
