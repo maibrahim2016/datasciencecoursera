@@ -23,13 +23,13 @@ Project Assignment
 
 <p style="text-align:justify">
   <font face="Arial" color="LIMEGREEN" size="5">
-    The goal of this exercise is to create a product to highlight the prediction             algorithm that you have built and to provide an interface that can be accessed by        others. For this project you must submit: 
+    The goal of this exercise is to create a product to highlight the prediction algorithm that you have built and to provide an interface that can be accessed by others. For this project you must submit: 
   <br>
 
-  [1] A Shiny app that takes as input a phrase (multiple words) in a text box input and     outputs a prediction of the next word.
+  [1] A Shiny app that takes as input a phrase (multiple words) in a text box input and outputs a prediction of the next word.
   <br>
 
-  [2] A slide deck consisting of no more than 5 slides created with **[R Studio      Presenter](https://support.rstudio.com/hc/en-us/articles/200486468-Authoring-R-Presentat   ions)** pitching your algorithm and app as if you were presenting to your boss or an      investor.
+  [2] A slide deck consisting of no more than 5 slides created with **[R Studio      Presenter](https://support.rstudio.com/hc/en-us/articles/200486468-Authoring-R-Presentations)** pitching your algorithm and app as if you were presenting to your boss or an investor.
   </font>
   
 
@@ -61,7 +61,7 @@ Algorithm Function - Probability Model
 
 <p style="text-align:justify">
   <font face="Arial" color="brown" size="5">
-    The algorithm built for this project is based on the n-grams model with the Markov        assumption. This is due to the speed returning predicted words and memory restrictions     of the shinyApps website. In other words, we seek to find the word (Wn) which             maximizes the conditional probability of (Wn) given its history.
+    The algorithm built for this project is based on the n-grams model with the Markov assumption. This is due to the speed returning predicted words and memory restrictions of the shinyApps website. In other words, we seek to find the word (Wn) which maximizes the conditional probability of (Wn) given its history.
   </font>
 </p>
 
